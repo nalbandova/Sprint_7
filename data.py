@@ -14,3 +14,9 @@ ORDER_DATA = {
     "deliveryDate": "2026-12-06",
     "comment": "Saske, come back to Konoha"
 }
+
+COURIER_ALREADY_EXISTS = 'Этот логин уже используется'
+NOT_ENOUGH_DATA_FOR_CREATE = 'Недостаточно данных для создания учетной записи'
+NOT_ENOUGH_DATA_FOR_LOGIN = 'Недостаточно данных для входа'
+ACCOUNT_NOT_FOUND = 'Учетная запись не найдена'
+COURIER_NOT_FOUND = 'Курьер с идентификатором {} не найден'

@@ -21,9 +21,10 @@ Sprint_7/
 │   ├── test_login_courier.py
 │   ├── test_create_order.py
 │   └── test_orders_list.py
+├── api_methods.py     # запросы к API (с allure.step)
 ├── conftest.py        # фикстуры
-├── data.py            # URL, ручки, тестовые данные
-├── helpers.py         # генерация данных, удаление курьера
+├── data.py            # URL, ручки, тестовые данные, тексты сообщений
+├── helpers.py         # генераторы тестовых данных
 ├── requirements.txt
 └── allure_report/     # готовый Allure-отчёт
 ```
@@ -45,10 +46,13 @@ allure generate allure_results -o allure_report --clean
 allure open allure_report
 ```
 
-## Известные расхождения стенда с документацией
+## Известные баги стенда
 
-Тесты ожидают фактические ответы стенда:
+Тесты написаны по документации. Один тест падает из-за расхождения стенда с документацией:
 
-| Запрос | По документации | Фактически |
+| Тест | По документации | Фактически |
 |---|---|---|
-| Логин курьера без поля `password` | 400, `Недостаточно данных для входа` | 504, `Service unavailable` |
+| `test_login_without_required_field[password]` (логин без пароля) | 400, `Недостаточно данных для входа` | 504, `Service unavailable` |
+
+Это баг API, а не ошибка тестов.
+

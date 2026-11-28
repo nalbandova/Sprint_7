@@ -1,7 +1,8 @@
 import allure
 import pytest
-import requests
-from data import BASE_URL, LOGIN
+
+from api_methods import login_courier
+from data import ACCOUNT_NOT_FOUND, NOT_ENOUGH_DATA_FOR_LOGIN
 from helpers import generate_random_string
 
 
@@ -9,48 +10,41 @@ class TestLoginCourier:
 
     @allure.title('Курьер может авторизоваться: код 200 и в ответе есть id')
     def test_login_courier_success(self, courier):
-        payload = {'login': courier[0], 'password': courier[1]}
+        payload = {'login': courier['login'], 'password': courier['password']}
 
-        response = requests.post(BASE_URL + LOGIN, data=payload)
+        response = login_courier(payload)
 
         assert response.status_code == 200
         assert isinstance(response.json()['id'], int)
 
-    @allure.title('Нельзя авторизоваться без логина')
-    def test_login_without_login(self, courier):
-        payload = {'password': courier[1]}
+    @allure.title('Нельзя авторизоваться без обязательного поля: {missing_field}')
+    @pytest.mark.parametrize('missing_field', ['login', 'password'])
+    def test_login_without_required_field(self, courier, missing_field):
+        payload = {'login': courier['login'], 'password': courier['password']}
+        payload.pop(missing_field)
 
-        response = requests.post(BASE_URL + LOGIN, data=payload)
+        response = login_courier(payload)
 
         assert response.status_code == 400
-        assert response.json()['message'] == 'Недостаточно данных для входа'
-
-    @allure.title('Авторизация без пароля: стенд возвращает 504')
-    def test_login_without_password(self, courier):
-        payload = {'login': courier[0]}
-
-        response = requests.post(BASE_URL + LOGIN, data=payload)
-
-        assert response.status_code == 504
-        assert response.text == 'Service unavailable'
+        assert response.json()['message'] == NOT_ENOUGH_DATA_FOR_LOGIN
 
     @allure.title('Ошибка при неправильном значении поля: {wrong_field}')
     @pytest.mark.parametrize('wrong_field', ['login', 'password'])
     def test_login_with_wrong_credentials(self, courier, wrong_field):
-        payload = {'login': courier[0], 'password': courier[1]}
+        payload = {'login': courier['login'], 'password': courier['password']}
         payload[wrong_field] = generate_random_string(10)
 
-        response = requests.post(BASE_URL + LOGIN, data=payload)
+        response = login_courier(payload)
 
         assert response.status_code == 404
-        assert response.json()['message'] == 'Учетная запись не найдена'
+        assert response.json()['message'] == ACCOUNT_NOT_FOUND
 
     @allure.title('Ошибка при авторизации под несуществующим пользователем')
     def test_login_nonexistent_courier(self):
         payload = {'login': generate_random_string(10), 'password': generate_random_string(10)}
 
-        response = requests.post(BASE_URL + LOGIN, data=payload)
+        response = login_courier(payload)
 
         assert response.status_code == 404
-        assert response.json()['message'] == 'Учетная запись не найдена'
+        assert response.json()['message'] == ACCOUNT_NOT_FOUND
         
